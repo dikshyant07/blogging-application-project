@@ -1,10 +1,15 @@
 package com.blogging.application.bloggingProject.security;
 
 import com.blogging.application.bloggingProject.customhandlers.CustomAccessDeniedHandler;
+import com.blogging.application.bloggingProject.filters.JwtFilter;
+import com.blogging.application.bloggingProject.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,14 +32,17 @@ import static org.springframework.http.HttpMethod.*;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final JwtFilter jwtFilter;
     private final String adminRoute = "/api/v1/admin/**";
     private final String managementRoute = "/api/v1/management/**";
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Autowired
-    public SecurityConfig(CustomAccessDeniedHandler customAccessDeniedHandler) {
+    public SecurityConfig(JwtFilter jwtFilter, CustomAccessDeniedHandler customAccessDeniedHandler) {
+        this.jwtFilter = jwtFilter;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -52,8 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(PUT, managementRoute).hasAnyAuthority(ADMIN_UPDATE.getPermissionName(), MANAGER_UPDATE.getPermissionName())
                         .requestMatchers(DELETE, managementRoute).hasAnyAuthority(ADMIN_DELETE.getPermissionName(), MANAGER_DELETE.getPermissionName())
                         .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
                 .build();
     }
@@ -61,6 +70,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(11);
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(customUserDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
