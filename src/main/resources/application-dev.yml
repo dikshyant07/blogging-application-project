@@ -1,0 +1,57 @@
+logging:
+  level:
+    com:
+      blogging:
+        application:
+          bloggingProject: DEBUG
+management:
+  endpoints:
+    health:
+      show-details: always
+  endpoint:
+    web:
+      exposure:
+        include: "*"
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/blogging_application
+    username: postgres
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dikshantaacharya04@gmail.com
+    password: xxxx xxxx xxxx xxxx
+    properties:
+      mail:
+        smtp:
+          auth: enable
+          starttls:
+            enable: true
+
+utils:
+  admin:
+    name: Dikshanta Acharya
+    age: 20
+    gender: MALE
+    email: dikshantaacharya04@gmail.com
+    password: @Dikshyant9898
+
+  manager:
+    name: Pratik Kattel
+    age: 20
+    gender: MALE
+    email: pratikkattel04@gmail.com
+    password: @Pratik9898
+
+  jwt:
+    secret: qD8rT5Wkz7mVn2Xy9B1hC4pR6aF0dJ8uE3sL9tY2wM5nH7gK0bZ4vP6qR8sD1fA3
+    expiry: 30
