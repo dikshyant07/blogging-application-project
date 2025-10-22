@@ -43,14 +43,14 @@ utils:
     age: 20
     gender: MALE
     email: dikshantaacharya04@gmail.com
-    password: @Dikshyant9898
+    password: "@Dikshyant9898"
 
   manager:
     name: Pratik Kattel
     age: 20
     gender: MALE
     email: pratikkattel04@gmail.com
-    password: @Pratik9898
+    password: "@Pratik9898"
 
   jwt:
     secret: qD8rT5Wkz7mVn2Xy9B1hC4pR6aF0dJ8uE3sL9tY2wM5nH7gK0bZ4vP6qR8sD1fA3

@@ -40,6 +40,7 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(req -> req
+                        .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers(adminRoute).hasRole(ADMIN.name())
                         .requestMatchers(POST, adminRoute).hasAnyAuthority(ADMIN_CREATE.getPermissionName())
                         .requestMatchers(GET, adminRoute).hasAnyAuthority(ADMIN_READ.getPermissionName())
