@@ -48,4 +48,5 @@ Groups multiple posts together (e.g., Technology, Travel).
 Used for labeling and searching posts (e.g., “Spring Boot”, “Java”).
 
 ---
+## Entity Relationship Diagram (ERD)
 ![ER Diagram](erd.png)
