@@ -26,7 +26,7 @@ public class AdminCreationService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.existsByEmail(utils.getAdmin().getEmail())) {
+        if (!userRepository.existsByEmail(utils.getAdmin().getEmail())) {
             User admin = User.builder()
                     .name(utils.getAdmin().getName())
                     .age(utils.getAdmin().getAge())
@@ -37,7 +37,7 @@ public class AdminCreationService implements CommandLineRunner {
                     .build();
             userRepository.save(admin);
         }
-        if (userRepository.existsByEmail(utils.getManager().getEmail())) {
+        if (!userRepository.existsByEmail(utils.getManager().getEmail())) {
             User manager = User.builder()
                     .name(utils.getManager().getName())
                     .age(utils.getManager().getAge())

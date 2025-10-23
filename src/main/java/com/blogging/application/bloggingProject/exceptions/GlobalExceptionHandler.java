@@ -20,6 +20,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ProblemDetail>> handleRuntimeExceptions(Exception e) {
         HttpStatus httpStatus;
         if (e instanceof UserAlreadyExistsException) httpStatus = HttpStatus.CONFLICT;
+        else if (e instanceof InvalidJwtException) httpStatus = HttpStatus.UNAUTHORIZED;
         else httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, e.getMessage());
         problemDetail.setProperty("Exception Time", LocalDateTime.now());

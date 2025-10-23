@@ -1,6 +1,7 @@
 package com.blogging.application.bloggingProject.security;
 
 import com.blogging.application.bloggingProject.customhandlers.CustomAccessDeniedHandler;
+import com.blogging.application.bloggingProject.customhandlers.JwtAuthenticationPoint;
 import com.blogging.application.bloggingProject.filters.JwtFilter;
 import com.blogging.application.bloggingProject.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,20 +37,28 @@ public class SecurityConfig {
     private final String adminRoute = "/api/v1/admin/**";
     private final String managementRoute = "/api/v1/management/**";
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final JwtAuthenticationPoint jwtAuthenticationPoint;
 
     @Autowired
-    public SecurityConfig(JwtFilter jwtFilter, CustomAccessDeniedHandler customAccessDeniedHandler) {
+    public SecurityConfig(JwtFilter jwtFilter, CustomAccessDeniedHandler customAccessDeniedHandler, JwtAuthenticationPoint jwtAuthenticationPoint) {
         this.jwtFilter = jwtFilter;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.jwtAuthenticationPoint = jwtAuthenticationPoint;
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/api/v1/public/**").permitAll()
+                        .requestMatchers("/api/v1/public/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+
+                        ).permitAll()
                         .requestMatchers(adminRoute).hasRole(ADMIN.name())
                         .requestMatchers(POST, adminRoute).hasAnyAuthority(ADMIN_CREATE.getPermissionName())
                         .requestMatchers(GET, adminRoute).hasAnyAuthority(ADMIN_READ.getPermissionName())
@@ -63,7 +72,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
+                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler).authenticationEntryPoint(jwtAuthenticationPoint))
                 .build();
     }
 
@@ -90,7 +99,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:8080/swagger-ui/index.html"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;

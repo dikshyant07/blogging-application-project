@@ -1,7 +1,9 @@
 package com.blogging.application.bloggingProject.service;
 
+import com.blogging.application.bloggingProject.exceptions.InvalidJwtException;
 import com.blogging.application.bloggingProject.utils.Utils;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -37,11 +39,16 @@ public class JwtService {
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(generateKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+
+        try {
+            return Jwts.parser()
+                    .verifyWith(generateKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (JwtException e) {
+            throw new InvalidJwtException("Invalid jwt token provided");
+        }
     }
 
     public String extractUsername(String token) {

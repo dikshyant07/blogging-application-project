@@ -22,11 +22,13 @@ import java.util.UUID;
 public class RefreshTokenService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtService jwtService;
 
     @Autowired
-    public RefreshTokenService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository) {
+    public RefreshTokenService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, JwtService jwtService) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.jwtService = jwtService;
     }
 
     private RefreshToken generateRefreshToken(User user) {
@@ -43,7 +45,8 @@ public class RefreshTokenService {
         Optional<RefreshToken> refreshTokenOptional = refreshTokenRepository.findByUser(user);
         refreshTokenOptional.ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshToken = generateRefreshToken(user);
-        return refreshToken.getToken();
+        RefreshToken savedToken = refreshTokenRepository.save(refreshToken);
+        return savedToken.getToken();
     }
 
     public ApiResponse<RefreshTokenResponseDto> refreshTheToken(TokenRefreshDto tokenRefreshDto) {
@@ -56,7 +59,7 @@ public class RefreshTokenService {
         refreshTokenRepository.delete(refreshToken);
         RefreshToken savedRefreshToken = refreshTokenRepository.save(newRefreshToken);
         RefreshTokenResponseDto responseDto = RefreshTokenResponseDto.builder()
-                .accessToken("Access Token")
+                .accessToken(jwtService.generateJwt(refreshToken.getUser().getEmail()))
                 .refreshToken(savedRefreshToken.getToken())
                 .build();
         return ApiResponse.<RefreshTokenResponseDto>builder()

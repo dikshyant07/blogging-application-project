@@ -25,6 +25,7 @@ public class User {
     private int age;
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @Column(unique = true)
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)

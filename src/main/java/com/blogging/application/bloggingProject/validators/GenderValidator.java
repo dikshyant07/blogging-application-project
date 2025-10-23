@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 public @interface GenderValidator {
     String message() default "Gender must me MALE,FEMALE or OTHERS";
 
-    Class<?>[] fields() default {};
+    Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
 }
