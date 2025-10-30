@@ -20,6 +20,7 @@ public class Post extends AuditingBoth {
     private Long id;
     private String title;
     private String content;
+    @Enumerated(EnumType.STRING)
     private Status status;
     @OneToMany(mappedBy = "post")
     @JsonBackReference

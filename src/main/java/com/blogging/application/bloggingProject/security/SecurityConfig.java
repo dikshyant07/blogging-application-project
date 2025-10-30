@@ -26,8 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 import static com.blogging.application.bloggingProject.enums.Permission.*;
-import static com.blogging.application.bloggingProject.enums.Role.ADMIN;
-import static com.blogging.application.bloggingProject.enums.Role.MANAGER;
+import static com.blogging.application.bloggingProject.enums.Role.*;
 import static org.springframework.http.HttpMethod.*;
 
 @Configuration
@@ -36,6 +35,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final String adminRoute = "/api/v1/admin/**";
     private final String managementRoute = "/api/v1/management/**";
+    private final String postRoute = "/api/v1/post/**";
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final JwtAuthenticationPoint jwtAuthenticationPoint;
 
@@ -60,17 +60,21 @@ public class SecurityConfig {
 
                         ).permitAll()
                         .requestMatchers(adminRoute).hasRole(ADMIN.name())
-                        .requestMatchers(POST, adminRoute).hasAnyAuthority(ADMIN_CREATE.getPermissionName())
-                        .requestMatchers(GET, adminRoute).hasAnyAuthority(ADMIN_READ.getPermissionName())
-                        .requestMatchers(PUT, adminRoute).hasAnyAuthority(ADMIN_UPDATE.getPermissionName())
-                        .requestMatchers(DELETE, adminRoute).hasAnyAuthority(ADMIN_DELETE.getPermissionName())
+
+                        .requestMatchers(POST, adminRoute).hasAuthority(ADMIN_CREATE.getPermissionName())
+                        .requestMatchers(GET, adminRoute).hasAuthority(ADMIN_READ.getPermissionName())
+                        .requestMatchers(PUT, adminRoute).hasAuthority(ADMIN_UPDATE.getPermissionName())
+                        .requestMatchers(DELETE, adminRoute).hasAuthority(ADMIN_DELETE.getPermissionName())
+
                         .requestMatchers(managementRoute).hasAnyRole(ADMIN.name(), MANAGER.name())
+
                         .requestMatchers(POST, managementRoute).hasAnyAuthority(ADMIN_CREATE.getPermissionName(), MANAGER_CREATE.getPermissionName())
                         .requestMatchers(GET, managementRoute).hasAnyAuthority(ADMIN_READ.getPermissionName(), MANAGER_READ.getPermissionName())
                         .requestMatchers(PUT, managementRoute).hasAnyAuthority(ADMIN_UPDATE.getPermissionName(), MANAGER_UPDATE.getPermissionName())
                         .requestMatchers(DELETE, managementRoute).hasAnyAuthority(ADMIN_DELETE.getPermissionName(), MANAGER_DELETE.getPermissionName())
+
+                        .requestMatchers(postRoute).hasAnyRole(USER.name(), ADMIN.name(), MANAGER.name())
                         .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler).authenticationEntryPoint(jwtAuthenticationPoint))
                 .build();

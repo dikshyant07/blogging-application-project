@@ -2,6 +2,7 @@ package com.blogging.application.bloggingProject.controllers;
 
 import com.blogging.application.bloggingProject.dtos.*;
 import com.blogging.application.bloggingProject.service.AuthenticationService;
+import com.blogging.application.bloggingProject.service.PostService;
 import com.blogging.application.bloggingProject.service.RefreshTokenService;
 import com.blogging.application.bloggingProject.service.UserService;
 import jakarta.validation.Valid;
@@ -18,12 +19,14 @@ public class PublicController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final RefreshTokenService refreshTokenService;
+    private final PostService postService;
 
     @Autowired
-    public PublicController(UserService userService, AuthenticationService authenticationService, RefreshTokenService refreshTokenService) {
+    public PublicController(UserService userService, AuthenticationService authenticationService, RefreshTokenService refreshTokenService, PostService postService) {
         this.userService = userService;
         this.authenticationService = authenticationService;
         this.refreshTokenService = refreshTokenService;
+        this.postService = postService;
     }
 
     @PostMapping("/signup")
@@ -44,4 +47,6 @@ public class PublicController {
         return new ResponseEntity<>(refreshTokenResponseDtoApiResponse, refreshTokenResponseDtoApiResponse.getHttpStatus());
 
     }
+
+
 }
